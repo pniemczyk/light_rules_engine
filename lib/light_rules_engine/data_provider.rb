@@ -1,11 +1,15 @@
 module LightRulesEngine
   class DataProvider
+    ReturningValueError = Class.new(StandardError)
+
     def initialize(data)
       @data = data
     end
 
     def value_for(keyword)
       send_methods(keyword).inject(data, &method(:call_chain_methods))
+    rescue => ex
+      raise ReturningValueError, "Error during returning #{keyword}, details: #{ex.message}"
     end
 
     private
@@ -40,7 +44,7 @@ module LightRulesEngine
       arg.delete!("\"'[()]")
       Integer(arg)
     rescue
-      arg
+      arg[0] == ':' ? arg[1..-1].to_sym : arg
     end
   end
 end

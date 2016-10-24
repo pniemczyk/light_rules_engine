@@ -5,7 +5,7 @@ guard :rspec, cmd: 'rspec' do
   watch('Gemfile')
 end
 
-# guard :rubocop, all_on_start: false, cli: ['--format', 'clang'] do
-#   watch(/.+\.rb$/)
-#   watch(%r{(?:.+/)?\.rubocop\.yml$}) { |m| File.dirname(m[0]) }
-# end
+guard :rubocop, all_on_start: false, cli: ['--format', 'clang'] do
+  watch(/.+\.rb$/)
+  watch(%r{(?:.+/)?\.rubocop\.yml$}) { |m| File.dirname(m[0]) }
+end

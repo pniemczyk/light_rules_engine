@@ -7,14 +7,20 @@ require 'light_rules_engine/operators/range'
 
 module LightRulesEngine
   module Operators
+    UnknownOperator = Class.new(StandardError)
     def self.find(name)
       class_name = classify_string(name.to_s)
-      self.const_get(class_name)
+      raise(UnknownOperator, name) unless operators_namespaces.const_defined?(class_name)
+      operators_namespaces.const_get(class_name)
+    end
+
+    def self.operators_namespaces
+      LightRulesEngine.config[:operators_namespace]
     end
 
     def self.classify_string(string)
       string = string.sub(/^[a-z\d]*/) { $&.capitalize }
-      string.gsub(/(?:_|(\/))([a-z\d]*)/) { "#{$1}#{$2.capitalize}" }.gsub('/', '::')
+      string.gsub(%r{/(?:_|(\/))([a-z\d]*)/}) { "#{$1}#{$2.capitalize}" }.gsub('/', '::') # rubocop:disable Style/PerlBackrefs
       string.sub(/.*\./, '')
     end
   end

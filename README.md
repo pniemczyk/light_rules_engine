@@ -91,6 +91,54 @@ So Rule:
     LightRulesEngine.rules_applicable?(data_container, rule)
 ```
 
+### Configuration
+
+```
+DEFAULT_CONFIG = {
+  data_provider_class: LightRulesEngine::DataProvider,
+  operators_namespace: LightRulesEngine::Operators,
+  operation_context_class: LightRulesEngine::OperatorContxt,
+  value_resolver_class: LightRulesEngine::ValueResolver,
+  consts: DEFAULT_CONSTS
+}.freeze
+```
+
+update of configuration is like:
+
+```
+class MyOperators
+  include LightRulesEngine::Operators # to have already defined operators
+  class DateEq
+    def self.result(*args)
+      first_date, last_date = args
+      return movable_date(first_date, last_date) if keyword?(first_date)
+      return movable_date(last_date, first_date) if keyword?(last_date)
+      first_date == last_date
+    end
+
+    def self.movable_date(date_keyword, date_to_compare)
+      ...
+    end
+  end
+end
+
+LightRulesEngine.setup_config(operators_namespace: MyOperators)
+
+conditions = {
+  kind: :operator,
+  type: :eq,
+  values: [
+    { kind: :value, type: 'EASTER_MONDAY' },
+    { kind: :data, type: 'booking.date' }
+  ]
+}
+rule           = BookingRule.new(source: business_source_logic, conditions: conditions)
+data_container = DataContainerBuilder.build(booking, name: :booking)
+
+# list of rules which are valid
+LightRulesEngine.rules_applicable?(data_container, rule)
+```
+
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
