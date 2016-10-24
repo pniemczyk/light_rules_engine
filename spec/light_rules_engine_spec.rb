@@ -13,27 +13,11 @@ class Booking
   attr_reader :date, :number, :name, :items, :elems, :numbers
 end
 
-class Container
-  def initialize(booking)
-    @booking = booking
-  end
-
-  attr_reader :booking
-end
-
 describe LightRulesEngine do
   it 'has a version number' do
     expect(LightRulesEngine::VERSION).not_to be nil
   end
 
-  it 'does something useful' do
-    expect(false).to eq(true)
-  end
-
-  # $operator
-  # @value
-  # %const
-  #
   let(:conditions_secound) do
     {
       kind: :operator,
@@ -112,8 +96,8 @@ describe LightRulesEngine do
               kind: :operator,
               type: :eq,
               values: [
-                { kind: :const, type: 'THE_NUMBER' },
-                { kind: :value, type: :integer, value: 3 }
+                { kind: :const, type: 'RULE_ENGINE' },
+                { kind: :value, type: :string, value: 'LightRulesEngine' }
               ]
             },
             {
@@ -172,11 +156,11 @@ describe LightRulesEngine do
   end
 
   let(:container) do
-    Container.new(Booking.new(1, Time.now, 'test', { 'a' => double('Test', id: 1) }, [double('ttt', name: 'a')], [1, 300, -1]))
+    booking = Booking.new(1, Time.now, 'test', { 'a' => double('Test', id: 1) }, [double('ttt', name: 'a')], [1, 300, -1])
+    LightRulesEngine::DataContainerBuilder.build(booking, :booking)
   end
 
   it 'process' do
-    processor = LightRulesEngine::Processor.new(conditions: conditions_secound, data_container: container)
-    expect(processor.applable?).to eq(true)
+    expect(LightRulesEngine.applicable_conditions?(container, conditions_secound)).to eq(true)
   end
 end
