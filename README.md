@@ -22,7 +22,74 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+### Concept of light rule engine
+
+When we need to have some kind of dynamic rules which we want to apply based on some conditions this can be a solution.
+
+- Rule it is place holder for business decisions and conditions when we can apply them
+
+So Rule:
+
+```
+    class BookingRule < LightRulesEngine::BaseRule
+    end
+
+    booking = double('booking', kind: 'Hotel', room: 'single', pax: 4, items: { bed: 'double', see_view: true, windows_count: 4 })
+
+    data_container = DataContainerBuilder.build(booking, name: :booking)
+    conditions     ={
+      kind: :operator,
+      type: :all,
+      values: [
+        {
+          kind: :operator,
+          type: :eq,
+          values: [
+            { kind: :data, type: 'booking.kind' },
+            { kind: :value, type: :string, value: 'Hotel'}
+          ]
+        },
+        {
+          kind: :operator,
+          type: :gt,
+          values: [
+            { kind: :data, type: 'booking.pax' },
+            { kind: :value, type: :integer, value: 2 }
+          ]
+        },   
+        {
+          kind: :operator,
+          type: :any,
+          values: [
+            {
+              kind: :operator,
+              type: :eq,
+              values: [
+                { kind: :const, type: 'DOUBLE_BED' },
+                { kind: :data, type: 'booking.items[:bed]' }
+              ]
+            },
+            {
+              kind: :operator,
+              type: :range,
+              values: [
+                { kind: :value, type: 'integer', value: 3 },
+                { kind: :value, type: 'integer', value: 12 },
+                { kind: :data, type: 'booking.items[:windows_count]' }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+    rule = BookingRule.new(source: business_source_logic, conditions: conditions)
+    
+    # true / false
+    LightRulesEngine.applicable_conditions?(data_container, conditions)
+    
+    # list of rules which are valid
+    LightRulesEngine.rules_applicable?(data_container, rule)
+```
 
 ## Development
 
